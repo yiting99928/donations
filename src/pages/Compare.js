@@ -1,10 +1,14 @@
 import Papa from 'papaparse';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { PieChart } from './PieChart';
 
 export function Compare() {
   const [companyData, setCompanyData] = useState(null);
-  const [selectData, setSelectData] = useState([null, null]);
+  const [selectData, setSelectData] = useState([
+    { 候選人: '', 推薦政黨: '', data: [] },
+    { 候選人: '', 推薦政黨: '', data: [] },
+  ]);
 
   useEffect(() => {
     function fetchData() {
@@ -41,6 +45,13 @@ export function Compare() {
     setSelectData(updatedSelectData);
   }
 
+  function totalMoney(moneyData) {
+    const total = moneyData.reduce((total, item) => {
+      return total + Number(item['收入金額']);
+    }, 0);
+    return total;
+  }
+
   console.log(selectData);
   return (
     <Container>
@@ -50,7 +61,7 @@ export function Compare() {
           <div key={index}>
             <select
               name={`candidate${index}`}
-              value={data && data['候選人']}
+              value={data['候選人']}
               onChange={(e) => selectCandidates(e.target.value, index)}>
               <option value="">please select</option>
               {companyData &&
@@ -60,7 +71,20 @@ export function Compare() {
                   </option>
                 ))}
             </select>
-            <div>{data && data['推薦政黨']}</div>
+
+            {data['候選人'] !== '' && (
+              <div>
+                {data['候選人']}
+                <br />
+                {data['推薦政黨']}
+                <br />
+                {`總收入金額：${totalMoney(data.data)}`}
+                <br />
+                <br />
+                捐贈者/支出對象/收入金額
+                <PieChart data={data.data} index={index} size={300} />
+              </div>
+            )}
           </div>
         ))}
       </Wrapper>
@@ -71,5 +95,5 @@ export function Compare() {
 const Container = styled.div`
 `;
 const Wrapper = styled.div`
-display:flex;
+  display:flex;
 `;
