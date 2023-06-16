@@ -2,6 +2,7 @@ import Papa from 'papaparse';
 import { useEffect, useState } from 'react';
 import { MdOutlineAttachMoney, MdPerson } from 'react-icons/md';
 import styled from 'styled-components';
+import { Error } from '../components/Error';
 import { PieChart } from './PieChart';
 
 export function Compare() {
@@ -24,7 +25,7 @@ export function Compare() {
         const results = Papa.parse(text, { header: true });
         setCompanyData(results.data);
       } catch (error) {
-        console.log('Failed to fetch company data: ' + error.message);
+        setCompanyData('error');
       }
     }
     fetchData();
@@ -55,11 +56,11 @@ export function Compare() {
     return total;
   }
 
-  // console.log(selectData);
   return (
     <Container>
-      <PageTitle>Political Contributions Compared</PageTitle>
+      <PageTitle>2016年 | 政治人物政治獻金比較</PageTitle>
       <Wrapper>
+        {selectData === 'error' && <Error />}
         {selectData.map((data, index) => (
           <CandidateContainer key={index}>
             <CandidateSelect
