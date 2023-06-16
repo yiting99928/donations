@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import { useEffect, useState } from 'react';
+import { MdOutlineAttachMoney, MdPerson } from 'react-icons/md';
 import styled from 'styled-components';
 import { PieChart } from './PieChart';
 
@@ -11,18 +12,20 @@ export function Compare() {
   ]);
 
   useEffect(() => {
-    function fetchData() {
-      Papa.parse(
-        'https://raw.githubusercontent.com/mirror-media/politicalcontribution/master/legislators/2016/A02_company_all_public.csv',
-        {
-          download: true,
-          header: true,
-          complete: function (results) {
-            // console.log(results);
-            setCompanyData(results.data);
-          },
+    async function fetchData() {
+      try {
+        const res = await fetch(
+          'https://raw.githubusercontent.com/mirror-media/politicalcontribution/master/legislators/2016/A02_company_all_public.csv'
+        );
+        if (!res.ok) {
+          throw new Error('HTTP error ' + res.status);
         }
-      );
+        const text = await res.text();
+        const results = Papa.parse(text, { header: true });
+        setCompanyData(results.data);
+      } catch (error) {
+        console.log('Failed to fetch company data: ' + error.message);
+      }
     }
     fetchData();
   }, []);
@@ -52,17 +55,18 @@ export function Compare() {
     return total;
   }
 
-  console.log(selectData);
+  // console.log(selectData);
   return (
     <Container>
-      <h3>候選人比較</h3>
+      <PageTitle>Political Contributions Compared</PageTitle>
       <Wrapper>
         {selectData.map((data, index) => (
-          <div key={index}>
-            <select
+          <CandidateContainer key={index}>
+            <CandidateSelect
               name={`candidate${index}`}
               value={data['候選人']}
-              onChange={(e) => selectCandidates(e.target.value, index)}>
+              onChange={(e) => selectCandidates(e.target.value, index)}
+              disabled={index === 1 && selectData[0]['候選人'] === ''}>
               <option value="">please select</option>
               {companyData &&
                 candidatesList().map((item) => (
@@ -70,30 +74,87 @@ export function Compare() {
                     {item}
                   </option>
                 ))}
-            </select>
+            </CandidateSelect>
 
             {data['候選人'] !== '' && (
-              <div>
-                {data['候選人']}
+              <CompareContainer>
+                <PersonContainer>
+                  <Person>
+                    <MdPerson />
+                    {data['候選人']}
+                  </Person>
+                  <Group>{data['推薦政黨']}</Group>
+                </PersonContainer>
+                <Donate>
+                  <MdOutlineAttachMoney />
+                  資金總額：{totalMoney(data.data)} 元
+                </Donate>
                 <br />
-                {data['推薦政黨']}
-                <br />
-                {`總收入金額：${totalMoney(data.data)}`}
-                <br />
-                <br />
-                捐贈者/支出對象/收入金額
                 <PieChart data={data.data} index={index} size={300} />
-              </div>
+              </CompareContainer>
             )}
-          </div>
+          </CandidateContainer>
         ))}
       </Wrapper>
     </Container>
   );
 }
-
+const PageTitle = styled.h3`
+  text-align:center;
+  letter-spacing:1.2px;
+  color: #ff6b0f;
+`;
 const Container = styled.div`
+  margin:60px auto;
+  max-width:800px;
 `;
 const Wrapper = styled.div`
   display:flex;
+  gap:20px;
+`;
+const CandidateContainer = styled.div`
+  width:50%;
+`;
+const CandidateSelect = styled.select`
+  width:100%;
+  border-radius:10px;
+  padding:3px;
+  margin-bottom:20px;
+  outline: none;
+  border: 1px solid #5b5b5b;
+`;
+const CompareContainer = styled.div`
+  border:1px solid #f1f1f1;
+  border-radius:20px;
+  padding:20px;
+  min-height:712px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.06);
+  &:hover{
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+  }
+`;
+const PersonContainer = styled.div`
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  letter-spacing:.2rem;
+  font-weight:600;
+  border-bottom:.5px solid #b5b5b5;
+  padding-bottom:10px;
+  margin-bottom:15px;
+`;
+const Person = styled.div`
+  font-weight:600;
+  font-size:24px;
+  letter-spacing:.5rem;
+  display:flex;
+  align-items:center;
+  gap:10px;
+`;
+const Group = styled.span`
+    font-size:18px;
+`;
+const Donate = styled(Person)`
+  letter-spacing:0.1rem;
+  margin-top:10px;
 `;
