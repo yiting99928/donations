@@ -23,7 +23,11 @@ export function Compare() {
         }
         const text = await res.text();
         const results = Papa.parse(text, { header: true });
-        setCompanyData(results.data);
+        const transformedData = results.data.map((item) => ({
+          ...item,
+          收入金額: Number(item.收入金額),
+        }));
+        setCompanyData(transformedData);
       } catch (error) {
         setCompanyData('error');
       }
@@ -51,10 +55,14 @@ export function Compare() {
 
   function totalMoney(moneyData) {
     const total = moneyData.reduce((total, item) => {
-      return total + Number(item['收入金額']);
+      return total + item['收入金額'];
     }, 0);
     return total;
   }
+
+  const formatMoney = (number) => {
+    return new Intl.NumberFormat().format(number);
+  };
 
   return (
     <Container>
@@ -68,7 +76,9 @@ export function Compare() {
               value={data['候選人']}
               onChange={(e) => selectCandidates(e.target.value, index)}
               disabled={index === 1 && selectData[0]['候選人'] === ''}>
-              <option value="">please select</option>
+              <option value="" disabled>
+                please select
+              </option>
               {companyData &&
                 candidatesList().map((item) => (
                   <option key={item} value={item}>
@@ -88,10 +98,10 @@ export function Compare() {
                 </PersonContainer>
                 <Donate>
                   <MdOutlineAttachMoney />
-                  資金總額：{totalMoney(data.data)} 元
+                  資金總額：{formatMoney(totalMoney(data.data))} 元
                 </Donate>
                 <br />
-                <PieChart data={data.data} index={index} size={300} />
+                <PieChart data={data.data} index={index} />
               </CompareContainer>
             )}
           </CandidateContainer>
