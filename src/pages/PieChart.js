@@ -1,11 +1,10 @@
 import * as d3 from 'd3';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { tool } from '../utils/tool';
 
 // 工具function
-const formatMoney = (number) => {
-  return new Intl.NumberFormat().format(number);
-};
+
 // 計算半徑
 const calculateRadius = (width, height, margin) =>
   Math.min(width, height) / 2 - margin;
@@ -69,11 +68,6 @@ const getOrCreateGroup = (svg, width, height) => {
   return g;
 };
 
-// 計算總金額
-const calculateTotalAmount = (data) => {
-  return data.reduce((total, d) => total + d.amount, 0);
-};
-
 const createPieChart = (g, colorScale, data, radius) => {
   g.selectAll('path').remove(); // 移除所有現有的路徑
   g.selectAll('text').remove(); // 移除所有現有的文字
@@ -82,7 +76,7 @@ const createPieChart = (g, colorScale, data, radius) => {
   const data_ready = pie(data);
 
   const tooltip = d3.select('#chartTooltip');
-  const totalAmount = calculateTotalAmount(data); // 加上這一行
+  const totalAmount = tool.calculateTotalAmount(data);
 
   // 增加圖表 title
   g.append('text')
@@ -103,7 +97,7 @@ const createPieChart = (g, colorScale, data, radius) => {
     .attr('stroke', '#fff')
     .style('stroke-width', '1px')
     .on('mouseover', (event, d) => {
-      tooltip.text(`${d.data.donor} / ${formatMoney(d.data.amount)}元`);
+      tooltip.text(`${d.data.donor} / ${tool.formatMoney(d.data.amount)}元`);
       tooltip.style('top', event.pageY - 10 + 'px');
       tooltip.style('left', event.pageX + 10 + 'px');
       tooltip.style('visibility', 'visible');
@@ -150,7 +144,7 @@ export const PieChart = ({ data, index }) => {
           {newData.map((d) => (
             <LegendItem key={d.key}>
               <LegendColor color={colorScale(d.donor)} />
-              {d.donor} <span>{formatMoney(d.amount)}元</span>
+              {d.donor} <span>{tool.formatMoney(d.amount)}元</span>
             </LegendItem>
           ))}
         </Legend>

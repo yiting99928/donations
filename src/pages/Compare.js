@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { MdOutlineAttachMoney, MdPerson } from 'react-icons/md';
 import styled from 'styled-components';
 import { Error } from '../components/Error';
+import { tool } from '../utils/tool';
 import { PieChart } from './PieChart';
 
 export function Compare() {
@@ -53,17 +54,6 @@ export function Compare() {
     setSelectData(updatedSelectData);
   }
 
-  function totalMoney(moneyData) {
-    const total = moneyData.reduce((total, item) => {
-      return total + item['收入金額'];
-    }, 0);
-    return total;
-  }
-
-  const formatMoney = (number) => {
-    return new Intl.NumberFormat().format(number);
-  };
-
   return (
     <Container>
       <PageTitle>2016年 | 政治人物政治獻金比較</PageTitle>
@@ -98,7 +88,11 @@ export function Compare() {
                 </PersonContainer>
                 <Donate>
                   <MdOutlineAttachMoney />
-                  資金總額：{formatMoney(totalMoney(data.data))} 元
+                  資金總額：
+                  {tool.formatMoney(
+                    tool.calculateTotalAmount(data.data, '收入金額')
+                  )}{' '}
+                  元
                 </Donate>
                 <br />
                 <PieChart data={data.data} index={index} />
