@@ -24,18 +24,17 @@ export const PieChart = ({ data, index, size }) => {
 
   const newData = topFiveData;
   useEffect(() => {
-    // set the dimensions and margins of the graph
+    // 設定圖形的大小
     const width = size,
       height = size,
       margin = 20;
 
-    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+    // 計算半徑
     const radius = Math.min(width, height) / 2 - margin;
 
-    // Select svg
+    // 選取 SVG 若無則創建一個新的
     let svg = d3.select(`#chart${index}`).select('svg');
 
-    // If it doesn't exist, create it
     if (svg.empty()) {
       svg = d3
         .select(`#chart${index}`)
@@ -44,13 +43,14 @@ export const PieChart = ({ data, index, size }) => {
         .attr('height', height);
     }
 
-    // Create or select g
+    // 選取中心點若無則創建一個新的
     let g = svg.select(`#chart${index}`).select('g');
     if (g.empty()) {
       g = svg
         .append('g')
         .attr('transform', `translate(${width / 2}, ${height / 2})`);
     }
+    // 在中心加上文字
     g.append('text')
       .attr('x', 0)
       .attr('y', 0)
@@ -61,18 +61,18 @@ export const PieChart = ({ data, index, size }) => {
       .style('dominant-baseline', 'middle')
       .raise();
 
-    // set the color scale
+    // 設置顏色比例尺的領域（domain）
     const donors = newData.map((d) => d.donor);
     colorScale.domain(donors);
 
-    // Compute the position of each group on the pie:
+    // 計算每个扇形的位置和大小
     const pie = d3.pie().value(function (d) {
       return d.amount;
     });
     const data_ready = pie(newData);
     const tooltip = d3.select('#chartTooltip');
 
-    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    // 建構圓餅圖
     g.selectAll('path')
       .data(data_ready)
       .join('path')
@@ -92,7 +92,6 @@ export const PieChart = ({ data, index, size }) => {
       });
   }, [colorScale, data, index, newData, size]);
 
-  // console.log(newData);
   return (
     <div>
       <Chart id={`chart${index}`} />
