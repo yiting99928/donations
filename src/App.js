@@ -1,3 +1,4 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 import { Compare } from './pages/Compare';
 
@@ -23,10 +24,13 @@ const GlobalStyle = createGlobalStyle`
 
 function App() {
   return (
-    <div>
+    <BrowserRouter>
       <GlobalStyle />
-      <Compare />
-    </div>
+      <Routes>
+        <Route path="*" element={<Navigate to="/donations" replace />} />
+        <Route path="/donations" element={<Compare />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

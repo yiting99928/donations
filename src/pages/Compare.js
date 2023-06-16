@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { MdOutlineAttachMoney, MdPerson } from 'react-icons/md';
 import styled from 'styled-components';
 import { Error } from '../components/Error';
+import { tool } from '../utils/tool';
 import { PieChart } from './PieChart';
 
 export function Compare() {
@@ -23,7 +24,11 @@ export function Compare() {
         }
         const text = await res.text();
         const results = Papa.parse(text, { header: true });
-        setCompanyData(results.data);
+        const transformedData = results.data.map((item) => ({
+          ...item,
+          收入金額: Number(item.收入金額),
+        }));
+        setCompanyData(transformedData);
       } catch (error) {
         setCompanyData('error');
       }
@@ -49,13 +54,6 @@ export function Compare() {
     setSelectData(updatedSelectData);
   }
 
-  function totalMoney(moneyData) {
-    const total = moneyData.reduce((total, item) => {
-      return total + Number(item['收入金額']);
-    }, 0);
-    return total;
-  }
-
   return (
     <Container>
       <PageTitle>2016年 | 政治人物政治獻金比較</PageTitle>
@@ -68,7 +66,9 @@ export function Compare() {
               value={data['候選人']}
               onChange={(e) => selectCandidates(e.target.value, index)}
               disabled={index === 1 && selectData[0]['候選人'] === ''}>
-              <option value="">please select</option>
+              <option value="" disabled>
+                please select
+              </option>
               {companyData &&
                 candidatesList().map((item) => (
                   <option key={item} value={item}>
@@ -88,10 +88,14 @@ export function Compare() {
                 </PersonContainer>
                 <Donate>
                   <MdOutlineAttachMoney />
-                  資金總額：{totalMoney(data.data)} 元
+                  資金總額：
+                  {tool.formatMoney(
+                    tool.calculateTotalAmount(data.data, '收入金額')
+                  )}{' '}
+                  元
                 </Donate>
                 <br />
-                <PieChart data={data.data} index={index} size={300} />
+                <PieChart data={data.data} index={index} />
               </CompareContainer>
             )}
           </CandidateContainer>
