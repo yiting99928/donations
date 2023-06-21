@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { tool } from '../utils/tool';
+import { tool } from '../../utils/tool';
 
 // 工具function
 
@@ -21,22 +21,19 @@ const sortData = (data) =>
 
 // 調整資料結構
 const prepareData = (sortedData) => {
-  const newData = sortedData.slice(0, 9).map((d) => ({
-    donor: d['捐贈者／支出對象'],
-    amount: d['收入金額'],
-    key: d['候選人'] + d['序號'],
-  }));
+  let newData = sortedData.slice(0, 9);
 
-  if (sortedData.length > 9) {
+  if (sortedData.length > 10) {
     const remainingData = sortedData.slice(9);
     const otherAmount = remainingData.reduce(
       (total, d) => total + d['收入金額'],
       0
     );
 
-    if (otherAmount > 0) {
-      newData.push({ donor: '其他', amount: otherAmount, key: 'other' });
-    }
+    newData = newData.concat({
+      '捐贈者／支出對象': '其他',
+      收入金額: otherAmount,
+    });
   }
 
   return newData;
@@ -72,11 +69,11 @@ const createPieChart = (g, colorScale, data, radius) => {
   g.selectAll('path').remove(); // 移除所有現有的路徑
   g.selectAll('text').remove(); // 移除所有現有的文字
 
-  const pie = d3.pie().value((d) => d.amount);
+  const pie = d3.pie().value((d) => d['收入金額']);
   const data_ready = pie(data);
 
   const tooltip = d3.select('#chartTooltip');
-  const totalAmount = tool.calculateTotalAmount(data);
+  const totalAmount = tool.calculateTotalAmount(data, '收入金額');
 
   // 增加圖表 title
   g.append('text')
@@ -93,11 +90,15 @@ const createPieChart = (g, colorScale, data, radius) => {
     .data(data_ready)
     .join('path')
     .attr('d', d3.arc().innerRadius(70).outerRadius(radius))
-    .attr('fill', (d) => colorScale(d.data.donor))
+    .attr('fill', (d) => colorScale(d.data['捐贈者／支出對象']))
     .attr('stroke', '#fff')
     .style('stroke-width', '1px')
     .on('mouseover', (event, d) => {
-      tooltip.text(`${d.data.donor} / ${tool.formatMoney(d.data.amount)}元`);
+      tooltip.text(
+        `${d.data['捐贈者／支出對象']} / ${tool.formatMoney(
+          d.data['收入金額']
+        )}元`
+      );
       tooltip.style('top', event.pageY - 10 + 'px');
       tooltip.style('left', event.pageX + 10 + 'px');
       tooltip.style('visibility', 'visible');
@@ -107,7 +108,8 @@ const createPieChart = (g, colorScale, data, radius) => {
     })
     .each(function (d) {
       // 計算百分比
-      let percentage = ((d.data.amount / totalAmount) * 100).toFixed(2) + '%';
+      let percentage =
+        ((d.data['收入金額'] / totalAmount) * 100).toFixed(2) + '%';
 
       // 為扇區中心點添加文字
       const centroid = d3.arc().innerRadius(70).outerRadius(radius).centroid(d);
@@ -126,7 +128,6 @@ export const PieChart = ({ data, index }) => {
   const newData = prepareData(sortedData);
   const colorScale = createColorScale();
   const radius = calculateRadius(300, 300, 20);
-
   useEffect(() => {
     const svg = getOrCreateSvg(`chart${index}`, 300, 300);
     const g = getOrCreateGroup(svg, 300, 300);
@@ -140,20 +141,20 @@ export const PieChart = ({ data, index }) => {
       <br />
       <div id="legend">
         <div />
-        <Legend>
-          {newData.map((d) => (
-            <LegendItem key={d.key}>
-              <LegendColor color={colorScale(d.donor)} />
-              {d.donor} <span>{tool.formatMoney(d.amount)}元</span>
+        <ul>
+          {newData.map((d, i) => (
+            <LegendItem key={i}>
+              <LegendColor color={colorScale(d['捐贈者／支出對象'])} />
+              {d['捐贈者／支出對象']}{' '}
+              <span>{tool.formatMoney(d['收入金額'])}元</span>
             </LegendItem>
           ))}
-        </Legend>
+        </ul>
       </div>
     </div>
   );
 };
-const Legend = styled.ul`
-`;
+
 const LegendItem = styled.li`
   display:flex;
   align-items:center;
@@ -164,7 +165,6 @@ const LegendItem = styled.li`
     margin-left:auto;
   }
 `;
-
 const LegendColor = styled.div`
   background-color: ${({ color }) => color};
   width: 10px;
