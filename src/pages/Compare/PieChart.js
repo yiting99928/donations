@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { tool } from '../utils/tool';
+import { tool } from '../../utils/tool';
 
 // 工具function
 

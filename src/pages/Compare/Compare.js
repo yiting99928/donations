@@ -2,11 +2,11 @@ import Papa from 'papaparse';
 import { useEffect, useState } from 'react';
 import { MdOutlineAttachMoney, MdPerson } from 'react-icons/md';
 import styled from 'styled-components';
-import { Error } from '../components/Error';
-import { tool } from '../utils/tool';
+import { Error } from '../../components/Error';
+import { tool } from '../../utils/tool';
 import { PieChart } from './PieChart';
 
-export function Compare() {
+export default function Compare() {
   const [companyData, setCompanyData] = useState(null);
   const [selectData, setSelectData] = useState([
     { 候選人: '', 推薦政黨: '', data: [] },
