@@ -123,7 +123,7 @@ const createPieChart = (g, colorScale, data, radius) => {
     });
 };
 
-export const PieChart = ({ data, index }) => {
+const PieChart = ({ data, index }) => {
   const sortedData = sortData(data);
   const newData = prepareData(sortedData);
   const colorScale = createColorScale();
@@ -191,3 +191,4 @@ const Chart = styled.div`
   min-width:300px;
   min-height:300px
 `;
+export default PieChart;

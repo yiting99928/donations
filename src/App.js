@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
-import Compare from './pages/Compare';
+import Compare from './pages/Compare/';
 
 const GlobalStyle = createGlobalStyle`
   * {

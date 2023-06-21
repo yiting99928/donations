@@ -1,7 +1,7 @@
 import { BiError } from 'react-icons/bi';
 import styled from 'styled-components';
 
-export function Error() {
+function Error() {
   return (
     <Container>
       <BiError />
@@ -22,3 +22,4 @@ const Container = styled.div`
     transform:scale(7)
   }
 `;
+export default Error;
